@@ -40,13 +40,13 @@ void callback(char* topic, byte* payload, unsigned int length) {
   }
   Serial.println();
 }
-*/
+
 void reconnect() {
   // Loop until we're reconnected
   while (!mqtt_client_my.connected()) {
     Serial.print("Attempting MQTT connection...");
     // Attempt to connect
-    if (mqtt_client_my.connect("ESP32Client")) {
+    if (mqtt_client_my.connect("ESP8266Client")) {
       Serial.println("connected");
       // Subscribe
       mqtt_client_my.subscribe("esp32/output");
@@ -59,7 +59,7 @@ void reconnect() {
     }
   }
 }
-
+*/
 
 const char* ssid = "BEENETIC_FIBRE";
 const char* password = "CairZigWatt2010";
@@ -112,7 +112,24 @@ void setup_wifi() {
   Serial.println("IP address: ");
   Serial.println(WiFi.localIP());
 }
-
+void reconnect() {
+  // Loop until we're reconnected
+  while (!client.connected()) {
+    Serial.print("Attempting MQTT connection...");
+    // Attempt to connect
+    if (client.connect("ESP8266Client")) {
+      Serial.println("connected");
+      // Subscribe
+      client.subscribe("esp32/output");
+    } else {
+      Serial.print("failed, rc=");
+      Serial.print(client.state());
+      Serial.println(" try again in 5 seconds");
+      // Wait 5 seconds before retrying
+      delay(5000);
+    }
+  }
+}
 /*
 void test(void *client){
   PubSubClient* local_client = (PubSubClient*)client;

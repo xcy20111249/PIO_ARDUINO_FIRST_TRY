@@ -13,7 +13,7 @@
 // }mqtt_test_client;
 
 
-extern PubSubClient mqtt_client_my;
+extern PubSubClient client;
 void callback(char* topic, uint8_t* message, unsigned int length);
 void setup_wifi();
 void reconnect();
