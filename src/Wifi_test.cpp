@@ -3,7 +3,9 @@
 #include "esp_event.h"
 #include "PubSubClient.h"
 
-#define TEST_MODE
+#include "config_test.h"
+
+// #define HOTPOINT_MODE
 #if defined HOTPOINT_MODE
 #define ssid "HLK-L41%0589%CloudClone"
 #define password "53026446"
