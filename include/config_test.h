@@ -3,5 +3,6 @@
 
 #define TEST_MODE
 #define MQTT_LOCAL_TEST
+#define BLE_TEST
 
 #endif

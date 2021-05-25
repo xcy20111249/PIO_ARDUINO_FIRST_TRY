@@ -17,6 +17,8 @@ void mqtt_client_my_init(){
   topicSubscribe_Hw = "imeds/database/" + Distributeur_id + "/hw/#";
   topicSubscribe_App = "imeds/database/" + Distributeur_id + "/app/#";
   topicSubscribe_Mtime = "imeds/database/" + Distributeur_id + "/mtime/#";
+
+  Serial.println("mqtt client initilized.");
 }
 
 // this function is called every time connecting to mqtt server
@@ -155,6 +157,8 @@ void test(void * arg){
       mqtt_client_my.publish("esp32/humidity", humString);
     }
   }
-  
+  Serial.println("ending mqtt task.");
+  xSemaphoreGive(task_semaphore_mqtt);
+  xSemaphoreTake(retask_semaphore_mqtt,0);
   vTaskDelete(NULL);
 }
