@@ -74,7 +74,7 @@ static void reconnect() {
       Serial.printf("[%s] Subscribing to /topic/test\n", TAG);
       while (!mqtt_client_my.subscribe("/topic/test",1)){
         Serial.print(".");
-        delay(500);
+        delay(200);
       }
       Serial.printf("[%s] Subscribing to esp32/temperature\n", TAG);
       while (!mqtt_client_my.subscribe("esp32/temperature",1))
@@ -99,7 +99,6 @@ static void reconnect() {
       delay(5000);
     }
   }
-  running_flag = true;
 }
 
 /*
@@ -122,6 +121,8 @@ void test(void * arg){
   int temperature;
   int humidity;
   mqtt_client_my.setCallback(callback);
+  running_flag = true;
+  Serial.println("starting test task...");
   
   while (!mqtt_client_my.connected()) {
     reconnect();
@@ -133,7 +134,9 @@ void test(void * arg){
     long now = millis();
     if (now - lastMsg > 5000) {
       lastMsg = now;
-      
+      mqtt_client_my.publish("/topic/test", "living...");
+      delay(100);
+      /*
       // Temperature in Celsius
       temperature = random(30);   
       // Uncomment the next line to set temperature in Fahrenheit 
@@ -155,10 +158,10 @@ void test(void * arg){
       Serial.print("Humidity: ");
       Serial.println(humString);
       mqtt_client_my.publish("esp32/humidity", humString);
+      */
     }
   }
   Serial.println("ending mqtt task.");
   xSemaphoreGive(task_semaphore_mqtt);
-  xSemaphoreTake(retask_semaphore_mqtt,0);
   vTaskDelete(NULL);
 }
