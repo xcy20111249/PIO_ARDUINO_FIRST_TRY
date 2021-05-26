@@ -10,11 +10,7 @@
 #include "BluetoothLE_Server_test.h"
 
 #include "config_test.h"
-
-#include "BluetoothSerial.h"
-#include "BLEDevice.h"
-#include "BLEUtils.h"
-#include "BLEUUID.h"
+#include "EEPROM.h"
 
 WiFiClient espClient;
 PubSubClient mqtt_client_my(espClient);
@@ -157,7 +153,7 @@ void setup() {
   xSemaphoreGive(test_semaphore);
   retask_semaphore_mqtt = xSemaphoreCreateBinary();
 
-  // BLE_Server_test_init();
+  BLE_Server_test_init();
 
   wifi_connect();
   mqtt_client_my_init();

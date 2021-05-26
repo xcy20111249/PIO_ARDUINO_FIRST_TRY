@@ -19,7 +19,7 @@ void BLE_Server_test_init() {
   Serial.begin(115200);
   Serial.println("Starting BLE work!");
 
-  BLEDevice::init("Long name works now");
+  BLEDevice::init("ESP32 BLE_TEST MODULE");
   BLEServer *pServer = BLEDevice::createServer();
   BLEService *pService = pServer->createService(SERVICE_UUID);
   BLECharacteristic *pCharacteristic = pService->createCharacteristic(
