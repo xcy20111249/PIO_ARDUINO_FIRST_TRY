@@ -8,9 +8,17 @@
 #include "PubSubClient.h"
 #include "BluetoothLE_Client_test.h"
 #include "BluetoothLE_Server_test.h"
+#include <SD.h>
 
 #include "config_test.h"
-#include "EEPROM.h"
+#include "JSONUtils.h"
+
+#include <string>
+#include <fstream>
+#include <sstream>
+#include <iostream>
+
+#include "sd_test_raw.h"
 
 WiFiClient espClient;
 PubSubClient mqtt_client_my(espClient);
@@ -27,6 +35,8 @@ SemaphoreHandle_t test_semaphore;
 
 bool running_flag;
 long now;
+
+char* json_string;
 
 void semaphore_test(){
   while (1){
@@ -145,8 +155,27 @@ void print_state(TaskHandle_t xHandle){
   }
 }
 
+void sd_test(char* path){
+  std::fstream json_stream;
+  json_stream.open(path, std::ios::in | std::ios::out);
+  std::string contest = "writing test";
+  json_stream.write(contest.c_str(), contest.length());
+  json_stream << "test" << std::endl;
+  json_stream.close();
+}
+void sd_test_read(char* path){
+  char data[128];
+  std::fstream json_stream;
+  json_stream.open(path, std::ios::in);
+  json_stream >> data;
+  json_stream.close();
+  Serial.print(data);
+
+}
+
 void setup() {
   Serial.begin(115200);
+  /*
   task_semaphore_mqtt = xSemaphoreCreateBinary();
   xSemaphoreGive(task_semaphore_mqtt);
   test_semaphore = xSemaphoreCreateBinary();
@@ -162,9 +191,13 @@ void setup() {
   // xTaskCreate (BLE_Client_TEST_loop, "ble_test", 4096, NULL, 1, &xHandle_BLE);
   running_flag = true;
   Serial.println("setup done");
+  */
+  json_string = "{\"ID\":\"xcy\"}";
+
 }
 
 void loop() {
+  /*
   Serial.println("loop started......");
   delay(2000);
   mqtt_restart();
@@ -175,6 +208,7 @@ void loop() {
   mqtt_restart();
   delay(5000);
   mqtt_terminate();
+  */
   // xTaskCreate (task_test, "test", 4096, NULL, 1, &xHandle_test);
   // Serial.println("task created");
   // print_state(xHandle_test);
@@ -184,6 +218,13 @@ void loop() {
   // task_stop();
   // delay(200);
   // print_state(xHandle_test);
+
+  DynamicJsonDocument test_doc = lectureJson(json_string);
+  char* data = get_test_direct(test_doc);
+  Serial.println(data);
+  Serial.println("************************");
+  char* changed = ecritureJson(test_doc);
+  Serial.println(changed);
   while (1)
   {
     sleep(30);
