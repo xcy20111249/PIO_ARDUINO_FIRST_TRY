@@ -36,7 +36,7 @@ SemaphoreHandle_t test_semaphore;
 bool running_flag;
 long now;
 
-char* json_string;
+const char* json_string;
 
 void semaphore_test(){
   while (1){
@@ -192,8 +192,8 @@ void setup() {
   running_flag = true;
   Serial.println("setup done");
   */
-  json_string = "{\"ID\":\"xcy\"}";
-
+  json_string = "{\"hello\":\"world\"}";
+  Serial.println(json_string);
 }
 
 void loop() {
@@ -220,11 +220,19 @@ void loop() {
   // print_state(xHandle_test);
 
   DynamicJsonDocument test_doc = lectureJson(json_string);
-  char* data = get_test_direct(test_doc);
+  const char* data = get_test_direct(test_doc);
   Serial.println(data);
   Serial.println("************************");
-  char* changed = ecritureJson(test_doc);
+  String changed = ecritureJson(test_doc);
   Serial.println(changed);
+  test_doc["ID"] = 12345;
+  changed = ecritureJson(test_doc);
+  Serial.println(changed);
+  test_doc["ID"] = 45678;
+  changed = ecritureJson(test_doc);
+  Serial.println(changed);
+  const char* func_data = get_test_function(test_doc);
+  Serial.println(func_data);
   while (1)
   {
     sleep(30);

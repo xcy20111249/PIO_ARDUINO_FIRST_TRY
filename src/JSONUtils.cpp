@@ -4,14 +4,26 @@
 #include <fstream>
 #include <sstream>
 
-DynamicJsonDocument lectureJson (char* data){
-    DynamicJsonDocument doc(2048);
-    deserializeJson(doc, data);
+// static void deserializeerrorprint(DeserializationError err){
+//     switch ((int)err)
+//     {
+//     case 0:
+//         Serial.println("OK");
+//         break;
+    
+//     default:
+//         break;
+//     }
+// }
+
+DynamicJsonDocument lectureJson (const char* data){
+    DynamicJsonDocument doc(128);
+    DeserializationError err = deserializeJson(doc, data);
     return doc;
 }
 
-char* ecritureJson (DynamicJsonDocument doc){
-    char* data;
+String ecritureJson (DynamicJsonDocument doc){
+    String data;
     serializeJsonPretty (doc, data);
     return data;
 }
@@ -20,18 +32,15 @@ char* ecritureJson (DynamicJsonDocument doc){
 
 // }
 
-char* get_test_direct(DynamicJsonDocument doc){
-    JsonObject root = doc.to<JsonObject>();
-    JsonVariant content = root["test_empty_topic"];
-    std::string test_content = content.as<std::string>();
-    const char* t = test_content.c_str();
-    return t;
+const char* get_test_direct(DynamicJsonDocument doc){
+    const char* content = doc["test_empty_topic"];
+    return content;
 }
 
-// char* get_test_function(DynamicJsonDocument doc){
-//     JsonVariant test_content = doc.getMember("test_topic");
-//     if (test_content.isNull()){
-//         Serial.println("Error: test_topic missing");
-//     }
-//     return test_content;
-// }
+const char* get_test_function(DynamicJsonDocument doc){
+    JsonVariant test_content = doc.getMember("test_topic");
+    if (test_content.isNull()){
+        Serial.println("Error: test_topic missing");
+    }
+    return test_content;
+}

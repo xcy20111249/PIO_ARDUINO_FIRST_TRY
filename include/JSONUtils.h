@@ -3,9 +3,9 @@
 
 #include "ArduinoJson.h"
 
-DynamicJsonDocument lectureJson (char* data);
-char* ecritureJson (DynamicJsonDocument doc);
-char* get_test_direct(DynamicJsonDocument doc);
-// char* get_test_function(DynamicJsonDocument doc);
+DynamicJsonDocument lectureJson (const char* data);
+String ecritureJson (DynamicJsonDocument doc);
+const char* get_test_direct(DynamicJsonDocument doc);
+const char* get_test_function(DynamicJsonDocument doc);
 
-#endif
+#endif  
