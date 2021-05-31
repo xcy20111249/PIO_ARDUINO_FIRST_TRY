@@ -41,6 +41,7 @@ long now;
 const char* json_string;
 const char* json_string_empty;
 const char* json_test;
+std::string id_pass[2];
 
 void semaphore_test(){
   while (1){
@@ -208,7 +209,10 @@ void setup() {
 
   //Bluetooth classic test setup
   Bluetooth_init();
-
+  Bluetooth_test(id_pass);
+  set_ssid(id_pass[0]);
+  set_password(id_pass[1]);
+  wifi_connect();
 }
 
 void loop() {

@@ -1,3 +1,5 @@
+#include <Arduino.h>
+#include <sstream>
 #include "BluetoothSerial.h"
 #include "Bluetooth_classic.h"
 
@@ -8,6 +10,8 @@
 #endif
 
 BluetoothSerial SerialBT;
+char START_FLAG = '$';
+char END_FLAG = '#';
 
 void Bluetooth_init(){
     SerialBT.begin("ESP32TEST_X");
@@ -31,25 +35,51 @@ void Bluetooth_loop(void *){
 }
 
 void Bluetooth_test(std::string id_pass[2]){
-    char* incomingmsg;
+    std::string incomingmsg;
+    std::stringstream incomingstream;
     while (!SerialBT.connected()){
         Serial.print(".");
         sleep(2);
     }
     bool done = false;
+    SerialBT.println("Which network do you want to connect?");
+    Serial.println("Which network do you want to connect?");
     while(!done){
         if (SerialBT.available()) {
             char incomingChar = SerialBT.read();
-            while (incomingChar != '\n')
-            {
-                incomingmsg += incomingChar;
+            while (incomingChar != END_FLAG)
+            {  
+                incomingstream<<incomingChar;
                 incomingChar = SerialBT.read();
             }
-            Serial.printf("ssid is %s", incomingmsg);
+            incomingmsg = incomingstream.str();
+            Serial.printf("ssid is %s\n", incomingmsg.c_str());
+            id_pass[0] = incomingmsg;
+            done = true;
+        }else{
+            delay(100);
+            Serial.print(".");
         }
+    }
+    incomingmsg = "";
+    incomingstream.str("");
+    done = false;
+    SerialBT.println("What's the password?");
+    while (!done){
         if (SerialBT.available()) {
-            Serial.write(SerialBT.read());
+            char incomingChar = SerialBT.read();
+            while (incomingChar != END_FLAG)
+            {
+                incomingstream<<incomingChar;
+                incomingChar = SerialBT.read();
+            }
+            Serial.print("");
+            incomingmsg = incomingstream.str();
+            Serial.printf("password is %s\n", incomingmsg.c_str());
+            id_pass[1] = incomingmsg;
+            done = true;
+        }else{
+            delay(100);
         }
-        delay(20);
     }
 }
