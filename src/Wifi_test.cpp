@@ -9,9 +9,28 @@
 #if defined HOTPOINT_MODE
 #define ssid "HLK-L41%0589%CloudClone"
 #define password "53026446"
-#elif defined TEST_MODE
+#elif defined BEENEITC_LOCAL_MODE
 #define ssid "BEENETIC_FIBRE"
 #define password "CairZigWatt2010"
+#elif defined BLE_CONN_MODE
+char* ssid;
+char* password;
+
+void set_ssid(char* id){
+    ssid = id;
+}
+void set_password(char* code){
+    password = code;
+}
+#elif defined BLUETOOTH_CLASSIC || defined BLUETOOTH_CONN_MODE
+char* ssid;
+char* password;
+void set_ssid(char* id){
+    ssid = id;
+}
+void set_password(char* code){
+    password = code;
+}
 #endif
 
 void wifi_connect(){

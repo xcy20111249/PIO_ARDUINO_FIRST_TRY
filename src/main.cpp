@@ -8,7 +8,8 @@
 #include "PubSubClient.h"
 #include "BluetoothLE_Client_test.h"
 #include "BluetoothLE_Server_test.h"
-#include <SD.h>
+#include "Bluetooth_classic.h"
+// #include <SD.h>
 
 #include "config_test.h"
 #include "JSONUtils.h"
@@ -25,6 +26,7 @@ PubSubClient mqtt_client_my(espClient);
 TaskHandle_t xHandle_mqtt;
 TaskHandle_t xHandle_blink;
 TaskHandle_t xHandle_BLE;
+TaskHandle_t xHandle_Bluetooth;
 TaskHandle_t xHandle_test;
 
 SemaphoreHandle_t task_semaphore_blink;
@@ -37,6 +39,8 @@ bool running_flag;
 long now;
 
 const char* json_string;
+const char* json_string_empty;
+const char* json_test;
 
 void semaphore_test(){
   while (1){
@@ -175,6 +179,8 @@ void sd_test_read(char* path){
 
 void setup() {
   Serial.begin(115200);
+
+  //BLE and WiFi test setup
   /*
   task_semaphore_mqtt = xSemaphoreCreateBinary();
   xSemaphoreGive(task_semaphore_mqtt);
@@ -192,8 +198,17 @@ void setup() {
   running_flag = true;
   Serial.println("setup done");
   */
+
+  //json test setup
+  /*
   json_string = "{\"hello\":\"world\"}";
   Serial.println(json_string);
+  json_test="{\"ID\": \"xcy\",\"password\": \"12345\",\"things\":[\"thing1\",\"thing2\"],\"else\":{\"anyID\": \"xxx\",\"anypassword\": \"12345\",}}";
+  */
+
+  //Bluetooth classic test setup
+  Bluetooth_init();
+
 }
 
 void loop() {
@@ -219,20 +234,22 @@ void loop() {
   // delay(200);
   // print_state(xHandle_test);
 
-  DynamicJsonDocument test_doc = lectureJson(json_string);
-  const char* data = get_test_direct(test_doc);
-  Serial.println(data);
-  Serial.println("************************");
-  String changed = ecritureJson(test_doc);
-  Serial.println(changed);
-  test_doc["ID"] = 12345;
-  changed = ecritureJson(test_doc);
-  Serial.println(changed);
-  test_doc["ID"] = 45678;
-  changed = ecritureJson(test_doc);
-  Serial.println(changed);
-  const char* func_data = get_test_function(test_doc);
-  Serial.println(func_data);
+  // DynamicJsonDocument test_doc = lectureJson(json_test);
+  // const char* test_data = get_any_member(test_doc, (char*)"anyID");
+  // Serial.println(test_data);
+  // const char* data = get_test_direct(test_doc);
+  // Serial.println(data);
+  // Serial.println("************************");
+  // String changed = ecritureJson(test_doc);
+  // Serial.println(changed);
+  // test_doc["ID"] = 12345;
+  // changed = ecritureJson(test_doc);
+  // Serial.println(changed);
+  // test_doc["ID"] = 45678;
+  // changed = ecritureJson(test_doc);
+  // Serial.println(changed);
+  // const char* func_data = get_test_function(test_doc);
+  // Serial.println(func_data);
   while (1)
   {
     sleep(30);

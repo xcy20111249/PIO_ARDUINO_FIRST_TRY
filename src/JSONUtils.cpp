@@ -4,21 +4,10 @@
 #include <fstream>
 #include <sstream>
 
-// static void deserializeerrorprint(DeserializationError err){
-//     switch ((int)err)
-//     {
-//     case 0:
-//         Serial.println("OK");
-//         break;
-    
-//     default:
-//         break;
-//     }
-// }
-
 DynamicJsonDocument lectureJson (const char* data){
-    DynamicJsonDocument doc(128);
+    DynamicJsonDocument doc(2048);
     DeserializationError err = deserializeJson(doc, data);
+    Serial.println(err.c_str());
     return doc;
 }
 
@@ -28,9 +17,23 @@ String ecritureJson (DynamicJsonDocument doc){
     return data;
 }
 
-// char* parseDistribJson(DynamicJsonDocument doc){
+char* parseDistribJson(DynamicJsonDocument doc){
+    std::stringstream data_stream;
+    data_stream<<doc["Dist_ID"]<<"//"<<doc["Patient_ID"]<<"//"<<doc["Power"]<<"//"<<doc["Language"]<<"//"
+    <<doc["NW_level"]<<"//"<<doc["Tim"]<<"//"<<doc["MNT"]["tx_cpt"]<<"//"<<doc["MNT"]["rx_cpt"];
+    char* data; 
+    data_stream>>data;
+    return data;
+}
 
-// }
+const char* get_any_member (DynamicJsonDocument doc, char* key){
+    JsonVariant test_content = doc.getMember(key );
+    if (test_content.isNull()){
+        Serial.printf("Error: %s missing", key);
+    }
+    return test_content;
+
+}
 
 const char* get_test_direct(DynamicJsonDocument doc){
     const char* content = doc["test_empty_topic"];
