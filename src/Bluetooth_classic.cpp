@@ -18,6 +18,7 @@ void Bluetooth_init(){
     Serial.println("Device started, try to pair");
 }
 
+/*
 void Bluetooth_loop(void *){
     while (!SerialBT.connected()){
         Serial.print(".");
@@ -33,6 +34,7 @@ void Bluetooth_loop(void *){
         delay(20);
     }
 }
+*/
 
 void Bluetooth_test(std::string id_pass[2]){
     std::string incomingmsg;
@@ -47,6 +49,11 @@ void Bluetooth_test(std::string id_pass[2]){
     while(!done){
         if (SerialBT.available()) {
             char incomingChar = SerialBT.read();
+            while (incomingChar != START_FLAG)
+            {
+                incomingChar = SerialBT.read();
+            }
+            incomingChar = SerialBT.read();
             while (incomingChar != END_FLAG)
             {  
                 incomingstream<<incomingChar;
@@ -58,7 +65,6 @@ void Bluetooth_test(std::string id_pass[2]){
             done = true;
         }else{
             delay(100);
-            Serial.print(".");
         }
     }
     incomingmsg = "";
@@ -68,6 +74,11 @@ void Bluetooth_test(std::string id_pass[2]){
     while (!done){
         if (SerialBT.available()) {
             char incomingChar = SerialBT.read();
+            while (incomingChar != START_FLAG)
+            {
+                incomingChar = SerialBT.read();
+            }
+            incomingChar = SerialBT.read();
             while (incomingChar != END_FLAG)
             {
                 incomingstream<<incomingChar;
@@ -82,4 +93,9 @@ void Bluetooth_test(std::string id_pass[2]){
             delay(100);
         }
     }
+}
+
+//constantly running while bluetooth is active and treat incoming message
+void Bluetooth_loop(void *){
+    
 }

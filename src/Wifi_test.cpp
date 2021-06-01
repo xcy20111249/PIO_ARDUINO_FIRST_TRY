@@ -4,7 +4,7 @@
 #include "PubSubClient.h"
 #include "Wifi_test.h"
 
-// #define BEENEITC_LOCAL_MODE
+#define BEENEITC_LOCAL_MODE
 #if defined HOTPOINT_MODE
 #define ssid "HLK-L41%0589%CloudClone"
 #define password "53026446"
@@ -36,14 +36,42 @@ void set_password(std::string code){
 }
 #endif
 
-void wifi_connect(){
+// try to connect to wifi with given configuration, if unsuccess in 10 sec, return false
+bool wifi_connect(){
+    bool conn_failed=false;
     WiFi.begin(ssid, password);
     Serial.printf("Connecting to %s\n", ssid);
-    while (WiFi.status()!=WL_CONNECTED)
+    long now = millis();
+    long conn_start_time = now;
+    while (WiFi.status()!=WL_CONNECTED && !conn_failed)
     {
-        vTaskDelay(1000);
+        vTaskDelay(500);
         Serial.print(".");
+        now = millis();
+        if(now-conn_start_time>10000){
+            Serial.println("WiFi connection time out, please try again later...");
+            conn_failed = true;
+            return false;
+        }
     }
     Serial.printf("local IP: %s\n", WiFi.localIP().toString().c_str());
     Serial.printf("host IP: %s\n",WiFi.gatewayIP().toString().c_str());
+    return true;
+}
+
+void wifi_disconnect(){
+    Serial.println("Wifi disconnecting...");
+    WiFi.disconnect();
+    while (WiFi.status()!=WL_DISCONNECTED)
+    {
+        vTaskDelay(500);
+        Serial.print(".");
+    }
+    Serial.println("Wifi disconnected.");
+}
+
+bool wifi_reconnect(){
+    Serial.println("Wifi reconnecting...");
+    wifi_disconnect();
+    return wifi_connect();
 }

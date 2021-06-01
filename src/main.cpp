@@ -37,6 +37,7 @@ SemaphoreHandle_t test_semaphore;
 
 bool running_flag;
 long now;
+static bool wifi_connected;
 
 const char* json_string;
 const char* json_string_empty;
@@ -111,6 +112,13 @@ void mqtt_terminate(){
     }else{
       Serial.println("mqtt_test terminated");
     }
+  }
+  if (terminated){
+    while (mqtt_client_my.connected()){
+      mqtt_client_my.disconnect();
+      delay(100);
+    }
+    Serial.println("mqtt client disconnected.");
   }
   
 
@@ -208,18 +216,29 @@ void setup() {
   */
 
   //Bluetooth classic test setup
-  Bluetooth_init();
-  Bluetooth_test(id_pass);
-  set_ssid(id_pass[0]);
-  set_password(id_pass[1]);
-  wifi_connect();
+  // Bluetooth_init();
+  // Bluetooth_test(id_pass);
+  // set_ssid(id_pass[0]);
+  // set_password(id_pass[1]);
+
+  // wifi and mqtt test setup
+  wifi_connected = wifi_connect();
+  mqtt_client_my_init();
+  xTaskCreate (test, "mqtt_test", 4096, NULL, 1, &xHandle_mqtt);
+  xTaskCreate (blink, "blink", 4096, NULL, 1, &xHandle_blink);
+  task_semaphore_mqtt = xSemaphoreCreateBinary();
+  xSemaphoreGive(task_semaphore_mqtt);
+  test_semaphore = xSemaphoreCreateBinary();
+  xSemaphoreGive(test_semaphore);
+
 }
 
 void loop() {
-  /*
+  
   Serial.println("loop started......");
   delay(2000);
   mqtt_restart();
+  Serial.println("here");
   delay(10000);
   mqtt_stop();
   Serial.println("***********************");
@@ -227,7 +246,9 @@ void loop() {
   mqtt_restart();
   delay(5000);
   mqtt_terminate();
-  */
+  delay(2000);
+  mqtt_restart();
+  
   // xTaskCreate (task_test, "test", 4096, NULL, 1, &xHandle_test);
   // Serial.println("task created");
   // print_state(xHandle_test);
@@ -254,11 +275,11 @@ void loop() {
   // Serial.println(changed);
   // const char* func_data = get_test_function(test_doc);
   // Serial.println(func_data);
+  // sleep (3);
+  // wifi_disconnect();
   while (1)
   {
-    sleep(30);
-    
+    sleep(30); 
   }
-
 }
 

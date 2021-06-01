@@ -3,7 +3,8 @@
 
 #include "config_test.h"
 
-void wifi_connect();
+bool wifi_connect();
+void wifi_disconnect();
 
 #ifdef BLUETOOTH_CLASSIC
 void set_ssid(std::string id);

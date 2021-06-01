@@ -90,7 +90,6 @@ static void reconnect() {
       }
       on_connect_subscribe();
       Serial.println("Subscription done.");
-
     } else {
       Serial.print("failed, rc=");
       Serial.print(mqtt_client_my.state());
@@ -124,10 +123,9 @@ void test(void * arg){
   running_flag = true;
   Serial.println("starting test task...");
   
-  while (!mqtt_client_my.connected()) {
-    reconnect();
-  }
-
+  // while (!mqtt_client_my.connected()) {
+  reconnect();
+  // }
   while (running_flag)
   {
     mqtt_client_my.loop();
@@ -160,6 +158,8 @@ void test(void * arg){
       mqtt_client_my.publish("esp32/humidity", humString);
       */
     }
+    delay(500);
+    Serial.print(".");
   }
   Serial.println("ending mqtt task.");
   xSemaphoreGive(task_semaphore_mqtt);
