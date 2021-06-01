@@ -4,7 +4,7 @@
 #include "PubSubClient.h"
 #include "Wifi_test.h"
 
-#define BEENEITC_LOCAL_MODE
+// #define BEENEITC_LOCAL_MODE
 #if defined HOTPOINT_MODE
 #define ssid "HLK-L41%0589%CloudClone"
 #define password "53026446"
@@ -62,12 +62,16 @@ bool wifi_connect(){
 void wifi_disconnect(){
     Serial.println("Wifi disconnecting...");
     WiFi.disconnect();
-    while (WiFi.status()!=WL_DISCONNECTED)
-    {
-        vTaskDelay(500);
-        Serial.print(".");
+    if (WiFi.status() == WL_NO_SHIELD){
+        Serial.println("Wifi not even started.");
+    }else{
+        while (WiFi.status()!=WL_DISCONNECTED)
+        {
+            vTaskDelay(500);
+            Serial.print(".");
+        }
+        Serial.println("Wifi disconnected.");
     }
-    Serial.println("Wifi disconnected.");
 }
 
 bool wifi_reconnect(){

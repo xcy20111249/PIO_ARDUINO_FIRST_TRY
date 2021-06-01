@@ -186,6 +186,10 @@ void sd_test_read(char* path){
 
 }
 
+void bluetooth_terminate(){
+
+}
+
 void setup() {
   Serial.begin(115200);
 
@@ -217,37 +221,41 @@ void setup() {
 
   //Bluetooth classic test setup
   // Bluetooth_init();
-  // Bluetooth_test(id_pass);
+  // Bluetooth_wifi_conn(id_pass);
   // set_ssid(id_pass[0]);
   // set_password(id_pass[1]);
+  // wifi_connected = wifi_connect();
 
   // wifi and mqtt test setup
-  wifi_connected = wifi_connect();
-  mqtt_client_my_init();
-  xTaskCreate (test, "mqtt_test", 4096, NULL, 1, &xHandle_mqtt);
-  xTaskCreate (blink, "blink", 4096, NULL, 1, &xHandle_blink);
-  task_semaphore_mqtt = xSemaphoreCreateBinary();
-  xSemaphoreGive(task_semaphore_mqtt);
-  test_semaphore = xSemaphoreCreateBinary();
-  xSemaphoreGive(test_semaphore);
+  // wifi_connected = wifi_connect();
+  // mqtt_client_my_init();
+  // xTaskCreate (test, "mqtt_test", 4096, NULL, 1, &xHandle_mqtt);
+  // xTaskCreate (blink, "blink", 4096, NULL, 1, &xHandle_blink);
+  // task_semaphore_mqtt = xSemaphoreCreateBinary();
+  // xSemaphoreGive(task_semaphore_mqtt);
+  // test_semaphore = xSemaphoreCreateBinary();
+  // xSemaphoreGive(test_semaphore);
 
+  //Wifi conn via bluetooth
+  Bluetooth_init();
+  xTaskCreate(Bluetooth_loop, "bluetooth loop", 4096, NULL, 1, &xHandle_Bluetooth);
 }
 
 void loop() {
-  
-  Serial.println("loop started......");
-  delay(2000);
-  mqtt_restart();
-  Serial.println("here");
-  delay(10000);
-  mqtt_stop();
-  Serial.println("***********************");
-  delay(10000);
-  mqtt_restart();
-  delay(5000);
-  mqtt_terminate();
-  delay(2000);
-  mqtt_restart();
+  Serial.println(WiFi.isConnected());
+  // Serial.println("loop started......");
+  // delay(2000);
+  // mqtt_restart();
+  // Serial.println("here");
+  // delay(10000);
+  // mqtt_stop();
+  // Serial.println("***********************");
+  // delay(10000);
+  // mqtt_restart();
+  // delay(5000);
+  // mqtt_terminate();
+  // delay(2000);
+  // mqtt_restart();
   
   // xTaskCreate (task_test, "test", 4096, NULL, 1, &xHandle_test);
   // Serial.println("task created");
