@@ -12,10 +12,11 @@
 #error Bluetooth classic is not enabled!
 #endif
 
-BluetoothSerial SerialBT;
 static const char START_FLAG = '$';
 static const char END_FLAG = '#';
 static bool running_flag;
+BluetoothSerial SerialBT;
+extern SemaphoreHandle_t task_semaphore_bluetooth; 
 
 void Bluetooth_init(){
     SerialBT.begin("ESP32TEST_X");
@@ -24,7 +25,7 @@ void Bluetooth_init(){
 }
 
 /*
-void Bluetooth_loop(void *){
+void Bluetooth_print_loop(void *){
     while (!SerialBT.connected()){
         Serial.print(".");
         sleep(2);
@@ -44,10 +45,6 @@ void Bluetooth_loop(void *){
 void Bluetooth_wifi_conn(std::string id_pass[2]){
     std::string incomingmsg;
     std::stringstream incomingstream;
-    while (!SerialBT.connected()){
-        Serial.print(".");
-        sleep(2);
-    }
     bool done = false;
     SerialBT.println("Which network do you want to connect?");
     Serial.println("Which network do you want to connect?");
@@ -102,26 +99,41 @@ void Bluetooth_wifi_conn(std::string id_pass[2]){
 
 //constantly running while bluetooth is active and treat incoming message
 void Bluetooth_loop(void *){
+    running_flag = true;
     while (running_flag){
         std::string incomingmsg;
         std::stringstream incomingstream;
-        while (!SerialBT.connected())
+        while (!SerialBT.connected() && running_flag)
         {
             sleep(1);
         }
-        while (!SerialBT.available())
+        while (!SerialBT.available() && running_flag)
         {
             vTaskDelay(500);
+            continue;
         }
         char incomingChar = SerialBT.read();
-        while (incomingChar != START_FLAG){
+        int i = 0;
+        while (incomingChar != START_FLAG && i<10){
             incomingChar = SerialBT.read();
+            ++i;
+        }
+        if (i>=10){
+            Serial.println("Start flag not detected, restart reading..");
+            continue;
         }
         incomingChar = SerialBT.read();
-        while (incomingChar != END_FLAG)
+        i = 0;
+        while (incomingChar != END_FLAG && i<10)
         {
+            // Serial.print((int)incomingChar);
             incomingstream<<incomingChar;
             incomingChar = SerialBT.read();
+            ++i;
+        }
+        if(i>=10){
+            Serial.printf("Receive extra-long messages: %s\nignored", incomingstream.str().c_str());
+            continue;
         }
         incomingmsg = incomingstream.str();
         Serial.printf("Incoming message is %s\n", incomingmsg.c_str());
@@ -131,8 +143,9 @@ void Bluetooth_loop(void *){
             SerialBT.printf("Your request %s is unexpected.\n", incomingmsg.c_str());
             Serial.printf("Client asked for %s, unable to achieve.\n", incomingmsg.c_str());
         }
-        sleep(1);
     } 
+    xSemaphoreGive(task_semaphore_bluetooth);
+    Serial.println("Ending bluetooth comm...");
     vTaskDelete(NULL);  
 }
 
@@ -168,3 +181,4 @@ static void Event_treatment(char i){
 void Bluetooth_stop(){
     running_flag = false;
 }
+

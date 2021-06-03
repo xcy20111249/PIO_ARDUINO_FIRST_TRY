@@ -9,6 +9,7 @@
 #include "BluetoothLE_Client_test.h"
 #include "BluetoothLE_Server_test.h"
 #include "Bluetooth_classic.h"
+#include "BluetoothSerial.h"
 // #include <SD.h>
 
 #include "config_test.h"
@@ -21,6 +22,7 @@
 
 #include "sd_test_raw.h"
 
+extern BluetoothSerial SerialBT;
 WiFiClient espClient;
 PubSubClient mqtt_client_my(espClient);
 TaskHandle_t xHandle_mqtt;
@@ -33,6 +35,7 @@ SemaphoreHandle_t task_semaphore_blink;
 SemaphoreHandle_t task_semaphore_mqtt ;
 SemaphoreHandle_t retask_semaphore_mqtt ;
 SemaphoreHandle_t task_semaphore_BLE;
+SemaphoreHandle_t task_semaphore_bluetooth;
 SemaphoreHandle_t test_semaphore;
 
 bool running_flag;
@@ -106,22 +109,93 @@ void mqtt_terminate(){
       Serial.println("mqtt_test ternimate failed, retrying...");
       retry++;
       delay(500);
-    }
-    if(retry >= 2){
-      Serial.println("mqtt_test ternimate completely failed, fatal error!!");
-    }else{
-      Serial.println("mqtt_test terminated");
+      continue;
     }
   }
-  if (terminated){
+  if(!terminated){
+    Serial.println("mqtt_test ternimate completely failed, fatal error!!");
+  }else{
+    Serial.println("mqtt_test terminated");
     while (mqtt_client_my.connected()){
       mqtt_client_my.disconnect();
       delay(100);
     }
     Serial.println("mqtt client disconnected.");
   }
-  
+}
 
+void bluetooth_restart() {
+  bool done = false;
+  int retry = 0;
+  Serial.println("restarting bluetooth loop.");
+  Bluetooth_stop();
+  while (!done && retry < 2)
+  {
+    int waitting = 0;
+    if (xSemaphoreTake(task_semaphore_bluetooth, 2000 / portTICK_PERIOD_MS)==pdTRUE){
+      while (eTaskGetState(xHandle_Bluetooth) != eReady && waitting < 4){
+        ++waitting;
+        delay(200);
+      };
+      if (waitting >= 4){
+        Serial.println("bluetooth_loop delete failed...");
+        retry++;
+        continue;
+      }
+      xTaskCreate(Bluetooth_loop, "bluetooth loop", 4096, NULL, 1, &xHandle_Bluetooth);
+      done = true;
+    }else{
+      Serial.println("bluetooth loop restart failed, retrying...");
+      retry++;
+      delay(500);
+    }
+  }
+  if (retry >= 2){
+    Serial.println("bluetooth loop restart completely failed, fatal error!!");
+  }else{
+    Serial.println("bluetooth loop is running");
+  }
+}
+
+void bluetooth_terminate(){
+  bool terminated = false;
+  int retry = 0;
+  int waitting = 0;
+  Bluetooth_stop();
+  Serial.println("here");
+  while (!terminated && retry < 2)
+  {
+    if(xSemaphoreTake(task_semaphore_bluetooth, 2000 / portTICK_PERIOD_MS)==pdTRUE){
+      while (eTaskGetState(xHandle_Bluetooth) != eReady && waitting < 4){
+        ++waitting;
+        delay(50);
+      }
+      if (waitting >= 4){
+        Serial.println("bluetooth_loop delete failed...");
+        retry++;
+        continue;
+      }
+      terminated = true;
+      xSemaphoreGive(task_semaphore_bluetooth);
+    }else{
+      Serial.println("bluetooth_loop ternimate failed, retrying...");
+      retry++;
+      delay(500);
+      continue;
+    }
+  }
+  if(!terminated){
+    Serial.println("bluetooth_lopp ternimate completely failed, fatal error!!");
+  }else{
+    Serial.println("bluetooth_loop terminated");
+    while (SerialBT.connected()){
+      SerialBT.disconnect();
+      delay(100);
+    }
+    Serial.println("bluetooth disconnected.");
+    SerialBT.end();
+    Serial.println("bluetooth off.");
+  }
 }
 
 void task_test(void *){
@@ -186,10 +260,6 @@ void sd_test_read(char* path){
 
 }
 
-void bluetooth_terminate(){
-
-}
-
 void setup() {
   Serial.begin(115200);
 
@@ -232,17 +302,19 @@ void setup() {
   // xTaskCreate (test, "mqtt_test", 4096, NULL, 1, &xHandle_mqtt);
   // xTaskCreate (blink, "blink", 4096, NULL, 1, &xHandle_blink);
   // task_semaphore_mqtt = xSemaphoreCreateBinary();
-  // xSemaphoreGive(task_semaphore_mqtt);
   // test_semaphore = xSemaphoreCreateBinary();
-  // xSemaphoreGive(test_semaphore);
 
   //Wifi conn via bluetooth
   Bluetooth_init();
   xTaskCreate(Bluetooth_loop, "bluetooth loop", 4096, NULL, 1, &xHandle_Bluetooth);
+  task_semaphore_bluetooth = xSemaphoreCreateBinary();
 }
 
 void loop() {
-  Serial.println(WiFi.isConnected());
+  Serial.println("loop started...");
+  sleep(10);
+  bluetooth_restart();
+  
   // Serial.println("loop started......");
   // delay(2000);
   // mqtt_restart();

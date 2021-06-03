@@ -1,11 +1,13 @@
 #ifndef BLUETOOTH_CLASSIC_H_
 #define BLUETOOTH_CLASSIC_H_
 
+// #include "BluetoothSerial.h"
+
 static const char BLUETOOTH_EVENT_OK = '0';
 static const char BLUETOOTH_EVENT_WIFI_CONN = '1';
 static const char BLUETOOTH_EVENT_WIFI_DISCONN = '2';
-static const char BLUETOOTH_EVENT_MQTT_START = '3';
-static const char BLUETOOTH_EVENT_MQTT_STOP = '4';
+static const char BLUETOOTH_EVENT_CONF_LOCAL = '3';
+static const char BLUETOOTH_EVENT_CONF_REMOTE = '4';
 static const char BLUETOOTH_EVENT_WIFI_STATUS = '5';
 
 extern std::string id_pass[2];

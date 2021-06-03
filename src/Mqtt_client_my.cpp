@@ -100,17 +100,6 @@ static void reconnect() {
   }
 }
 
-/*
-void test(void *client){
-  PubSubClient* local_client = (PubSubClient*)client;
-  if (!local_client->connected()) {
-    reconnect();
-  }
-  local_client->loop();
-  vTaskDelete(NULL);
-}
-*/
-
 void mqtt_stop(){
   running_flag = false;
 }
@@ -122,6 +111,7 @@ void test(void * arg){
   mqtt_client_my.setCallback(callback);
   running_flag = true;
   Serial.println("starting test task...");
+  
   
   // while (!mqtt_client_my.connected()) {
   reconnect();
