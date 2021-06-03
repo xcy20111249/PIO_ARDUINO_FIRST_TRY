@@ -2,14 +2,7 @@
 #include <Arduino.h>
 #include "freertos/FreeRTOS.h"
 #include "Blink.h"
-#include "Wifi_test.h"
-#include "WiFi.h"
-#include "Mqtt_client_my.h"
-#include "PubSubClient.h"
-#include "BluetoothLE_Client_test.h"
-#include "BluetoothLE_Server_test.h"
-#include "Bluetooth_classic.h"
-#include "BluetoothSerial.h"
+#include "CommUtils.h"
 // #include <SD.h>
 
 #include "config_test.h"
@@ -22,21 +15,6 @@
 
 #include "sd_test_raw.h"
 
-extern BluetoothSerial SerialBT;
-WiFiClient espClient;
-PubSubClient mqtt_client_my(espClient);
-TaskHandle_t xHandle_mqtt;
-TaskHandle_t xHandle_blink;
-TaskHandle_t xHandle_BLE;
-TaskHandle_t xHandle_Bluetooth;
-TaskHandle_t xHandle_test;
-
-SemaphoreHandle_t task_semaphore_blink;
-SemaphoreHandle_t task_semaphore_mqtt ;
-SemaphoreHandle_t retask_semaphore_mqtt ;
-SemaphoreHandle_t task_semaphore_BLE;
-SemaphoreHandle_t task_semaphore_bluetooth;
-SemaphoreHandle_t test_semaphore;
 
 bool running_flag;
 long now;
@@ -47,6 +25,12 @@ const char* json_string_empty;
 const char* json_test;
 std::string id_pass[2];
 
+TaskHandle_t xHandle_test;
+TaskHandle_t xHandle_blink;
+
+SemaphoreHandle_t test_semaphore;
+SemaphoreHandle_t task_semaphore_blink;
+
 void semaphore_test(){
   while (1){
     xSemaphoreTake(test_semaphore, 2000 / portTICK_PERIOD_MS);
@@ -55,6 +39,7 @@ void semaphore_test(){
   }
 }
 
+/*
 void mqtt_restart() {
   bool done = false;
   int retry = 0;
@@ -197,6 +182,7 @@ void bluetooth_terminate(){
     Serial.println("bluetooth off.");
   }
 }
+*/
 
 void task_test(void *){
   delay(1000);
@@ -257,7 +243,6 @@ void sd_test_read(char* path){
   json_stream >> data;
   json_stream.close();
   Serial.print(data);
-
 }
 
 void setup() {
@@ -305,9 +290,8 @@ void setup() {
   // test_semaphore = xSemaphoreCreateBinary();
 
   //Wifi conn via bluetooth
-  Bluetooth_init();
-  xTaskCreate(Bluetooth_loop, "bluetooth loop", 4096, NULL, 1, &xHandle_Bluetooth);
-  task_semaphore_bluetooth = xSemaphoreCreateBinary();
+  Task_init_bluetooth();
+  TaskCreate_bluetooth();
 }
 
 void loop() {
