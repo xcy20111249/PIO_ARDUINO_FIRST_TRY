@@ -8,7 +8,6 @@
 
 extern PubSubClient mqtt_client_my;
 extern SemaphoreHandle_t task_semaphore_mqtt;
-extern SemaphoreHandle_t retask_semaphore_mqtt;
 
 #ifdef MQTT_LOCAL_TEST
 static const char* mqtt_server = "192.168.1.88";

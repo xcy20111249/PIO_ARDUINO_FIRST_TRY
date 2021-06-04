@@ -3,6 +3,7 @@
 #include "WiFi.h"
 #include "BluetoothSerial.h"
 #include "Bluetooth_classic.h"
+#include "mqtt_func.h"
 
 #include "Wifi_test.h"
 
@@ -132,7 +133,7 @@ void Bluetooth_loop(void *){
             ++i;
         }
         if(i>=10){
-            Serial.printf("Receive extra-long messages: %s\nignored", incomingstream.str().c_str());
+            Serial.printf("Receive extra-long messages: %s\nignored\n", incomingstream.str().c_str());
             continue;
         }
         incomingmsg = incomingstream.str();
@@ -169,8 +170,18 @@ static void Event_treatment(char i){
     case BLUETOOTH_EVENT_WIFI_STATUS:
         Serial.println("Bluetooth event wifi status.");
         Serial.print("wifi status is ");
-        Serial.print(WiFi.status());
+        print_wifi_status();
         Serial.println("");
+        break;
+    case BLUETOOTH_EVENT_MQTT_START:
+        if (!WiFi.isConnected()){
+            Serial.println("No network service, please connect to internet...");
+            break;
+        }
+        Task_init_mqtt();
+        TaskCreate_mqtt();
+    case BLUETOOTH_EVENT_MQTT_END:
+        
         break;
     default:
         Serial.println("Unexpected info..");
@@ -180,5 +191,38 @@ static void Event_treatment(char i){
 
 void Bluetooth_stop(){
     running_flag = false;
+}
+
+static void print_wifi_status(){
+    switch (WiFi.status())
+    {
+    case 255:
+        Serial.print("WL_NO_SHIELD");
+        break;
+    case 0:
+        Serial.print("WL_IDLE_STATUS");
+        break;
+    case 1:
+        Serial.print("WL_NO_SSID_AVAIL");
+        break;
+    case 2:
+        Serial.print("WL_SCAN_COMPLETED");
+        break;
+    case 3:
+        Serial.print("WL_CONNECTED");
+        break;
+    case 4:
+        Serial.print("WL_CONNECT_FAILED");
+        break;
+    case 5:
+        Serial.print("WL_CONNECTION_LOST");
+        break;
+    case 6:
+        Serial.print("WL_DISCONNECTED");
+        break;
+    default:
+        Serial.print("Unknown");
+        break;
+    }
 }
 

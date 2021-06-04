@@ -291,13 +291,14 @@ void setup() {
 
   //Wifi conn via bluetooth
   Task_init_bluetooth();
-  TaskCreate_bluetooth();
+  // TaskCreate_bluetooth();
 }
 
 void loop() {
   Serial.println("loop started...");
-  sleep(10);
-  bluetooth_restart();
+  sleep(2);
+  bluetooth_print_state();
+  bluetooth_terminate();
   
   // Serial.println("loop started......");
   // delay(2000);
