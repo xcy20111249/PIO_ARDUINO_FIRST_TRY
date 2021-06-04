@@ -4,9 +4,13 @@
 #include "Blink.h"
 #include "CommUtils.h"
 // #include <SD.h>
+#include <WiFi.h>
+#include "NVSUtils.h"
+#include "Wifi_test.h"
 
 #include "config_test.h"
 #include "JSONUtils.h"
+#include <Preferences.h>
 
 #include <string>
 #include <fstream>
@@ -19,6 +23,7 @@
 bool running_flag;
 long now;
 static bool wifi_connected;
+std::stringstream ss;
 
 const char* json_string;
 const char* json_string_empty;
@@ -30,6 +35,8 @@ TaskHandle_t xHandle_blink;
 
 SemaphoreHandle_t test_semaphore;
 SemaphoreHandle_t task_semaphore_blink;
+
+Preferences preferences;
 
 void semaphore_test(){
   while (1){
@@ -291,14 +298,71 @@ void setup() {
 
   //Wifi conn via bluetooth
   Task_init_bluetooth();
-  // TaskCreate_bluetooth();
+  TaskCreate_bluetooth();
+
+  // Sustainable storage test
+  // preferences.begin("credentials", false);
+
+  // ss<<preferences.getString("ssid","");
+  // ss>>id_pass[0];
+  // ss<<preferences.getString("password", "");
+  // ss>>id_pass[1];
+  // if (id_pass[0] == "" || id_pass[1] == ""){
+  //   Serial.println("No values saved for ssid or password");
+  // }else{
+  //   WiFi.mode(WIFI_STA);
+  //   WiFi.begin(id_pass[0].c_str(),id_pass[1].c_str());
+  //   Serial.print("Connecting to WiFi ..");
+  //   while (WiFi.status() != WL_CONNECTED) {
+  //     Serial.print('.');
+  //     delay(1000);
+  //   }
+  //   Serial.println(WiFi.localIP()); 
+  // }
+  // ESP.restart();
+
+  // Preferences prefs; // 声明Preferences对象
+  // prefs.begin("mynamespace"); // 打开命名空间mynamespace
+  // uint32_t count = prefs.getUInt("count", 0); // 获取当前命名空间中的键名为"count"的值
+  //                                             // 如果没有该元素则返回默认值0
+  // count++; // 累加计数
+  // Serial.printf("这是系统第 %u 次启动\n", count);
+
+  // if ((int)count>10)
+  // {
+  //   Serial.println("here");
+  //   prefs.clear();
+  //   count = 0;
+  // }
+  
+
+  // prefs.putUInt("count", count); // 将数据保存到当前命名空间的"count"键中
+  // prefs.end(); // 关闭当前命名空间
+
+  // delay(5000);
+  // ESP.restart(); // 重启系统
+
+  // NVS_TEST();
+  // nvs_comm_test();
+
 }
 
 void loop() {
   Serial.println("loop started...");
-  sleep(2);
-  bluetooth_print_state();
-  bluetooth_terminate();
+  wifi_connect();
+
+  //preferences test
+  // preferences.begin("test1");
+  // Serial.printf("from main global is %d\n", preferences.getBool("global",false));
+  // preferences.end();
+  // preferences.begin("test2");
+  // preferences.clear();
+  // Serial.printf("from main test2/global is %d\n", preferences.getBool("global"));
+  // preferences.end();
+
+  // sleep(2);
+  // bluetooth_print_state();
+  // bluetooth_terminate();
   
   // Serial.println("loop started......");
   // delay(2000);

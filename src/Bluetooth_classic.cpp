@@ -4,6 +4,7 @@
 #include "BluetoothSerial.h"
 #include "Bluetooth_classic.h"
 #include "mqtt_func.h"
+#include <Preferences.h>
 
 #include "Wifi_test.h"
 
@@ -18,6 +19,7 @@ static const char END_FLAG = '#';
 static bool running_flag;
 BluetoothSerial SerialBT;
 extern SemaphoreHandle_t task_semaphore_bluetooth; 
+static Preferences pref;
 
 void Bluetooth_init(){
     SerialBT.begin("ESP32TEST_X");
@@ -43,12 +45,13 @@ void Bluetooth_print_loop(void *){
 }
 */
 
-void Bluetooth_wifi_conn(std::string id_pass[2]){
+void Bluetooth_wifi_conn(){
     std::string incomingmsg;
     std::stringstream incomingstream;
     bool done = false;
     SerialBT.println("Which network do you want to connect?");
     Serial.println("Which network do you want to connect?");
+    pref.begin("wifi_config");
     while(!done){
         if (SerialBT.available()) {
             char incomingChar = SerialBT.read();
@@ -62,16 +65,16 @@ void Bluetooth_wifi_conn(std::string id_pass[2]){
                 incomingstream<<incomingChar;
                 incomingChar = SerialBT.read();
             }
-            incomingmsg = incomingstream.str();
+            incomingstream>>incomingmsg;
             Serial.printf("ssid is %s\n", incomingmsg.c_str());
-            id_pass[0] = incomingmsg;
+            pref.putString("ssid", incomingmsg.c_str());
             done = true;
         }else{
             delay(100);
         }
     }
     incomingmsg = "";
-    incomingstream.str("");
+    incomingstream.clear();
     done = false;
     SerialBT.println("What's the password?");
     while (!done){
@@ -85,17 +88,20 @@ void Bluetooth_wifi_conn(std::string id_pass[2]){
             while (incomingChar != END_FLAG)
             {
                 incomingstream<<incomingChar;
+                // incomingmsg+=incomingChar;
                 incomingChar = SerialBT.read();
             }
-            Serial.print("");
-            incomingmsg = incomingstream.str();
+            incomingstream>>incomingmsg;
+            Serial.println(incomingmsg.length());
             Serial.printf("password is %s\n", incomingmsg.c_str());
-            id_pass[1] = incomingmsg;
+            pref.putString("password", incomingmsg.c_str());
             done = true;
         }else{
             delay(100);
         }
     }
+    pref.putBool("wifi_setup", true);
+    pref.end();
 }
 
 //constantly running while bluetooth is active and treat incoming message
@@ -158,9 +164,7 @@ static void Event_treatment(char i){
         break;
     case BLUETOOTH_EVENT_WIFI_CONN:
         Serial.println("Bluetooth event wifi connection.");
-        Bluetooth_wifi_conn(id_pass);
-        set_ssid(id_pass[0]);
-        set_password(id_pass[1]);
+        Bluetooth_wifi_conn();
         wifi_connect();
         break;
     case BLUETOOTH_EVENT_WIFI_DISCONN:

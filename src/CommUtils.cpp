@@ -6,6 +6,7 @@
 #include "PubSubClient.h"
 #include "Bluetooth_classic.h"
 #include "BluetoothSerial.h"
+#include <Preferences.h>
 
 extern BluetoothSerial SerialBT;
 
@@ -126,4 +127,11 @@ bool bluetooth_terminate(){
     Serial.println("bluetooth off.");
   }
   return terminated;
+}
+
+void nvs_comm_test(){
+  Preferences pref;
+  pref.begin("test1", false);
+  Serial.printf("global is %d\n",pref.getBool("global", false));
+  pref.end();
 }
