@@ -92,7 +92,6 @@ void Bluetooth_wifi_conn(){
                 incomingChar = SerialBT.read();
             }
             incomingstream>>incomingmsg;
-            Serial.println(incomingmsg.length());
             Serial.printf("password is %s\n", incomingmsg.c_str());
             pref.putString("password", incomingmsg.c_str());
             done = true;
