@@ -6,6 +6,7 @@
 #include "epd4in2.h"
 #include "imagedata.h"
 #include "epdpaint.h"
+#include "config_test.h"
 
 #define gauche 0
 #define milieu 1
@@ -13,5 +14,8 @@
 
 int EPD_set_header (Epd epd, std::string text, int pos);
 int EPD_set_header (Epd epd, std::string text, int pos, int bgc);
+int EPD_set_footer (Epd epd, std::string text, int pos);
+int EPD_set_footer (Epd epd, std::string text, int pos, int bgc);
+
 
 #endif

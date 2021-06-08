@@ -6,8 +6,8 @@
 bool wifi_connect();
 void wifi_disconnect();
 
-#ifdef BLUETOOTH_CLASSIC
 void set_ssid(std::string id);
 void set_password(std::string code);
-#endif 
+bool wifi_clear();
+
 #endif

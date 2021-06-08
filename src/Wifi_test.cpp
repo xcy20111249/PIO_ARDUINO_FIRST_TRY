@@ -42,6 +42,7 @@ static Preferences pref;
 // try to connect to wifi with given configuration, if unsuccess in 10 sec, return false
 bool wifi_connect(){
     pref.begin("wifi_config");
+    pref.putBool("wifi_connected", false);
     if (pref.getBool("wifi_setup", false))
     {
         WiFi.begin(pref.getString("ssid").c_str(), pref.getString("password").c_str());
@@ -55,18 +56,20 @@ bool wifi_connect(){
             now = millis();
             if(now-conn_start_time>10000){
                 Serial.println("WiFi connection time out, please try again later...");
+                pref.end();
                 return false;
             }
         }
         Serial.printf("local IP: %s\n", WiFi.localIP().toString().c_str());
         Serial.printf("host IP: %s\n",WiFi.gatewayIP().toString().c_str());
+        pref.putBool("wifi_connected", true);
+        pref.end();
         return true;
     }else{
         Serial.println("Please setup wifi configuration via bluetooth.");
+        pref.end();
         return false;
     }
-    
-
 }
 
 void wifi_disconnect(){
@@ -88,4 +91,12 @@ bool wifi_reconnect(){
     Serial.println("Wifi reconnecting...");
     wifi_disconnect();
     return wifi_connect();
+}
+
+bool wifi_clear(){
+    Serial.println("Cleaning wifi settings...");
+    pref.begin("wifi_config", false);
+    bool done = pref.clear();
+    pref.end();
+    return done;
 }

@@ -176,6 +176,14 @@ static void Event_treatment(char i){
         print_wifi_status();
         Serial.println("");
         break;
+    case BLUETOOTH_EVENT_WIFI_CLEAR:
+        Serial.println("Bluetooth event wifi clear.");
+        if (wifi_clear()){
+            Serial.println("Wifi settings cleaned.");
+        }else{
+            Serial.println("Wifi settings clean up failed.");
+        }
+        break;
     case BLUETOOTH_EVENT_MQTT_START:
         if (!WiFi.isConnected()){
             Serial.println("No network service, please connect to internet...");
