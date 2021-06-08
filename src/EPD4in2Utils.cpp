@@ -6,6 +6,17 @@
 #define UNCOLORED   1
 
 static Preferences pref;
+static bool running_flag;
+static Epd epd;
+
+void epd_init(){
+  if (epd.Init() != 0) {
+    Serial.print("e-Paper init failed");
+    return;
+  }
+  epd.ClearFrame();
+  epd.DisplayFrame();
+}
 
 int EPD_set_header (Epd epd, std::string text, int pos, int bgc){
   unsigned char image[1500];
@@ -29,7 +40,7 @@ int EPD_set_header (Epd epd, std::string text, int pos, int bgc){
   paint.Clear(COLORED);
   paint.DrawStringAt(indent, 2, text.c_str(), &Font16, 1-bgc);
 
-  pref.begin("wifi_config", true);
+  pref.begin("status", true);
   if(pref.getBool("wifi_connected", false)){
     paint.DrawStringAt(356, 2, "wifi", &Font16, 1-bgc);
   }
@@ -70,4 +81,22 @@ int EPD_set_footer (Epd epd, std::string text, int pos, int bgc){
 
 int EPD_set_footer (Epd epd, std::string text, int pos){
   return EPD_set_footer (epd, text, pos, COLORED);
+}
+
+void EPD_loop (void *){
+  running_flag = true;
+  while (running_flag){
+    pref.begin("status", false);
+    if (pref.getBool("status_changed", false)){
+      EPD_set_header (epd, "test_header", milieu);
+      EPD_set_footer (epd, "test_footer", milieu);
+      epd.DisplayFrame();
+      epd.Sleep();
+      pref.putBool("status_changed", false);
+    }
+    pref.end();
+    Serial.println("here");
+    sleep(2);
+  }
+  vTaskDelete(NULL);
 }

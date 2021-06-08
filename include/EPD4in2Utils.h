@@ -12,10 +12,12 @@
 #define milieu 1
 #define droit 2
 
+void epd_init();
 int EPD_set_header (Epd epd, std::string text, int pos);
 int EPD_set_header (Epd epd, std::string text, int pos, int bgc);
 int EPD_set_footer (Epd epd, std::string text, int pos);
 int EPD_set_footer (Epd epd, std::string text, int pos, int bgc);
+void EPD_loop (void *);
 
 
 #endif

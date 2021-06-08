@@ -237,3 +237,6 @@ static void print_wifi_status(){
     }
 }
 
+bool get_BluetoothStatus(){
+    return SerialBT.connected();
+}

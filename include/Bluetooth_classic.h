@@ -19,5 +19,6 @@ void Bluetooth_loop(void*);
 static void Event_treatment(char i);
 void Bluetooth_stop();
 static void print_wifi_status();
+bool get_BluetoothStatus();
 
 #endif

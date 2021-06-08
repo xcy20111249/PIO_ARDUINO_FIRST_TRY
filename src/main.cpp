@@ -22,6 +22,8 @@
 #include "imagedata.h"
 #include "epdpaint.h"
 
+#include "StatusCheck.h"
+
 #include "EPD4in2Utils.h"
 
 #define COLORED     0
@@ -38,13 +40,13 @@ std::string id_pass[2];
 
 TaskHandle_t xHandle_test;
 TaskHandle_t xHandle_blink;
+TaskHandle_t xHandle_status;
+TaskHandle_t xHandle_epd;
 
 SemaphoreHandle_t test_semaphore;
 SemaphoreHandle_t task_semaphore_blink;
 
 static Preferences pref;
-
-static Epd epd;
 
 void semaphore_test(){
   while (1){
@@ -260,6 +262,8 @@ void sd_test_read(char* path){
   Serial.print(data);
 }
 
+
+
 void setup() {
   Serial.begin(115200);
 
@@ -307,13 +311,11 @@ void setup() {
   //Wifi conn via bluetooth
   Task_init_bluetooth();
   TaskCreate_bluetooth();
+  epd_init();
 
-  if (epd.Init() != 0) {
-    Serial.print("e-Paper init failed");
-    return;
-  }
-  epd.ClearFrame();
-
+  xTaskCreate(UpdateStatus, "update_status", 1024, NULL, 1, &xHandle_status);
+  Serial.println("here");
+  // xTaskCreate(EPD_loop, "epd_loop", 4096, NULL, 1, &xHandle_epd);
   // Sustainable storage test
   // preferences.begin("credentials", false);
 
@@ -363,55 +365,59 @@ void setup() {
 
 void loop() {
   Serial.println("loop started...");
+  sleep(5);
   wifi_connect();
 
+  // display task test
+
+
   // display test
-  pref.begin("wifi_config", false);
-  while (!pref.getBool("wifi_connected", false))
-  {
-    sleep(1);
-  }
+  // pref.begin("wifi_config", false);
+  // while (!WiFi.isConnected())
+  // {
+  //   sleep(1);
+  // }
 
-  /**
-  * Due to RAM not enough in Arduino UNO, a frame buffer is not allowed.
-  * In this case, a smaller image buffer is allocated and you have to 
-  * update a partial display several times.
-  * 1 byte = 8 pixels, therefore you have to set 8*N pixels at a time.
-  */
-  unsigned char image[1500];
-  // unsigned char image[0];
-  Paint paint(image, 400, 28);    //width should be the multiple of 8 
+  // /**
+  // * Due to RAM not enough in Arduino UNO, a frame buffer is not allowed.
+  // * In this case, a smaller image buffer is allocated and you have to 
+  // * update a partial display several times.
+  // * 1 byte = 8 pixels, therefore you have to set 8*N pixels at a time.
+  // */
+  // unsigned char image[1500];
+  // // unsigned char image[0];
+  // Paint paint(image, 400, 28);    //width should be the multiple of 8 
 
-  EPD_set_header(epd, "test header", milieu);
-  EPD_set_footer(epd, "test footer", milieu);
+  // EPD_set_header(epd, "test header", milieu);
+  // EPD_set_footer(epd, "test footer", milieu);
+
+  // // paint.Clear(UNCOLORED);
+  // // paint.DrawStringAt(0, 0, "e-Paper Demo", &Font16, COLORED);
+  // // epd.SetPartialWindow(paint.GetImage(), 0, 0, paint.GetWidth(), paint.GetHeight());
 
   // paint.Clear(UNCOLORED);
-  // paint.DrawStringAt(0, 0, "e-Paper Demo", &Font16, COLORED);
-  // epd.SetPartialWindow(paint.GetImage(), 0, 0, paint.GetWidth(), paint.GetHeight());
+  // paint.DrawStringAt(0, 0, "e-Paper Demo", &Font24, COLORED);
+  // epd.SetPartialWindow(paint.GetImage(), 100, 40, paint.GetWidth(), paint.GetHeight());
 
-  paint.Clear(UNCOLORED);
-  paint.DrawStringAt(0, 0, "e-Paper Demo", &Font24, COLORED);
-  epd.SetPartialWindow(paint.GetImage(), 100, 40, paint.GetWidth(), paint.GetHeight());
-
-  paint.Clear(COLORED);
-  paint.DrawStringAt(100, 2, "hello world", &Font24, UNCOLORED);
-  epd.SetPartialWindow(paint.GetImage(), 0, 64, paint.GetWidth(), paint.GetHeight());
+  // paint.Clear(COLORED);
+  // paint.DrawStringAt(100, 2, "hello world", &Font24, UNCOLORED);
+  // epd.SetPartialWindow(paint.GetImage(), 0, 64, paint.GetWidth(), paint.GetHeight());
   
-  paint.SetWidth(64);
-  paint.SetHeight(64);
+  // paint.SetWidth(64);
+  // paint.SetHeight(64);
 
-  paint.Clear(UNCOLORED);
-  paint.DrawRectangle(0, 0, 40, 50, COLORED);
-  paint.DrawLine(0, 0, 40, 50, COLORED);
-  paint.DrawLine(40, 0, 0, 50, COLORED);
-  epd.SetPartialWindow(paint.GetImage(), 72, 120, paint.GetWidth(), paint.GetHeight());
+  // paint.Clear(UNCOLORED);
+  // paint.DrawRectangle(0, 0, 40, 50, COLORED);
+  // paint.DrawLine(0, 0, 40, 50, COLORED);
+  // paint.DrawLine(40, 0, 0, 50, COLORED);
+  // epd.SetPartialWindow(paint.GetImage(), 72, 120, paint.GetWidth(), paint.GetHeight());
   
-  paint.Clear(UNCOLORED);
-  paint.DrawCircle(25, 25, 25, COLORED);
-  epd.SetPartialWindow(paint.GetImage(), 200, 120, paint.GetWidth(), paint.GetHeight());
+  // paint.Clear(UNCOLORED);
+  // paint.DrawCircle(25, 25, 25, COLORED);
+  // epd.SetPartialWindow(paint.GetImage(), 200, 120, paint.GetWidth(), paint.GetHeight());
 
-  epd.DisplayFrame();
-  epd.Sleep();
+  // epd.DisplayFrame();
+  // epd.Sleep();
 
 
   //preferences test
