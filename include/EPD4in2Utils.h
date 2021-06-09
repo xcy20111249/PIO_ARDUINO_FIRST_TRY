@@ -7,6 +7,7 @@
 #include "imagedata.h"
 #include "epdpaint.h"
 #include "config_test.h"
+#include "freertos/event_groups.h"
 
 #define gauche 0
 #define milieu 1

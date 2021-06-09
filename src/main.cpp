@@ -46,6 +46,8 @@ TaskHandle_t xHandle_epd;
 SemaphoreHandle_t test_semaphore;
 SemaphoreHandle_t task_semaphore_blink;
 
+EventGroupHandle_t xEventGroup_display;
+
 static Preferences pref;
 
 void semaphore_test(){
@@ -266,6 +268,11 @@ void sd_test_read(char* path){
 
 void setup() {
   Serial.begin(115200);
+  pref.begin("status", false);
+  pref.clear();
+  pref.end();
+
+  xEventGroup_display = xEventGroupCreate();
 
   //BLE and WiFi test setup
   /*
@@ -314,7 +321,7 @@ void setup() {
   epd_init();
 
   xTaskCreate(UpdateStatus, "update_status", 1024, NULL, 1, &xHandle_status);
-  Serial.println("here");
+  xTaskCreate(EPD_loop, "epd_loop", 4096, NULL, 2, &xHandle_epd);
   // xTaskCreate(EPD_loop, "epd_loop", 4096, NULL, 1, &xHandle_epd);
   // Sustainable storage test
   // preferences.begin("credentials", false);

@@ -83,6 +83,7 @@ int EPD_set_footer (Epd epd, std::string text, int pos){
   return EPD_set_footer (epd, text, pos, COLORED);
 }
 
+/*
 void EPD_loop (void *){
   running_flag = true;
   while (running_flag){
@@ -96,6 +97,46 @@ void EPD_loop (void *){
     }
     pref.end();
     Serial.println("here");
+    sleep(2);
+  }
+  vTaskDelete(NULL);
+}
+*/
+
+void EPD_loop (void *){
+  bool refresh = false;
+  running_flag = true;
+  EventBits_t eventRet;
+  bool temp;
+  while (running_flag){
+    eventRet = xEventGroupWaitBits(xEventGroup_display, event_wifi|event_bluetooth, pdTRUE, pdFALSE, 1000/portTICK_PERIOD_MS);
+    Serial.print("eventRet is ");
+    Serial.println(eventRet);
+    Serial.println("");
+    pref.begin("status", false);
+    if(eventRet & event_wifi){
+      temp = pref.getBool("wifi_connected", false);
+      pref.putBool("wifi_connected", !temp);
+      refresh = true;
+    }
+    if(eventRet & event_bluetooth){
+      temp = pref.getBool("bluetooth_connected", false);
+      pref.putBool("bluetooth_connected", !temp);
+      refresh = true;
+    }
+    if (refresh){
+      Serial.println("here");
+      EPD_set_header (epd, "test_header", milieu);
+      EPD_set_footer (epd, "test_footer", milieu);
+      Serial.println("here");
+      epd.DisplayFrame();
+      Serial.println("here");
+      epd.Sleep();
+      Serial.println("here");
+      refresh = false;
+    }
+    pref.end();
+    Serial.println("EPD running");
     sleep(2);
   }
   vTaskDelete(NULL);
