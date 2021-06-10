@@ -1,6 +1,8 @@
 
 #include "EPD4in2Utils.h"
 #include "Preferences.h"
+#include "image_imeds.h"
+#include "imageR6.h"
 
 #define COLORED     0
 #define UNCOLORED   1
@@ -15,7 +17,10 @@ void epd_init(){
     return;
   }
   epd.ClearFrame();
-  epd.DisplayFrame();
+  Serial.println("printing logo");
+  epd.DisplayFrame(IMAGE_imeds);
+  epd.ClearFrame();
+  Serial.printf("length of image is %d\n", strlen((char*)IMAGE_imeds));
 }
 
 int EPD_set_header (Epd epd, std::string text, int pos, int bgc){
@@ -109,14 +114,14 @@ void EPD_loop (void *){
   EventBits_t eventRet;
   bool temp;
   while (running_flag){
-    eventRet = xEventGroupWaitBits(xEventGroup_display, event_wifi|event_bluetooth, pdTRUE, pdFALSE, 1000/portTICK_PERIOD_MS);
+    eventRet = xEventGroupWaitBits(xEventGroup_display, event_wifi|event_bluetooth|event_test, pdTRUE, pdFALSE, 1000/portTICK_PERIOD_MS);
     Serial.print("eventRet is ");
     Serial.println(eventRet);
-    Serial.println("");
     pref.begin("status", false);
     if(eventRet & event_wifi){
       temp = pref.getBool("wifi_connected", false);
-      pref.putBool("wifi_connected", !temp);
+      int k = pref.putBool("wifi_connected", !temp);
+      Serial.printf("putbool return %d\n", k);
       refresh = true;
     }
     if(eventRet & event_bluetooth){
@@ -124,8 +129,20 @@ void EPD_loop (void *){
       pref.putBool("bluetooth_connected", !temp);
       refresh = true;
     }
+    pref.end();
+    if(eventRet & event_test){
+      // Serial.println("printing R6...");
+      // epd.DisplayFrame(IMAGER6);
+      // epd.ClearFrame();
+      EPD_set_header (epd, "Welcome!", milieu);
+      EPD_set_footer (epd, "test_footer", milieu);
+      Serial.println("test event rcvd, printing...");
+      epd.DisplayFrame();
+      // epd.DisplayFrame(IMAGER6);
+    }
     if (refresh){
       Serial.println("here");
+      epd.ClearFrame();
       EPD_set_header (epd, "test_header", milieu);
       EPD_set_footer (epd, "test_footer", milieu);
       Serial.println("here");
@@ -135,7 +152,6 @@ void EPD_loop (void *){
       Serial.println("here");
       refresh = false;
     }
-    pref.end();
     Serial.println("EPD running");
     sleep(2);
   }

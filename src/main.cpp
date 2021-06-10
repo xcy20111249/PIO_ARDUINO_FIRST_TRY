@@ -25,6 +25,7 @@
 #include "StatusCheck.h"
 
 #include "EPD4in2Utils.h"
+#include "displaytestUtils.h"
 
 #define COLORED     0
 #define UNCOLORED   1
@@ -42,6 +43,7 @@ TaskHandle_t xHandle_test;
 TaskHandle_t xHandle_blink;
 TaskHandle_t xHandle_status;
 TaskHandle_t xHandle_epd;
+TaskHandle_t xHandle_displaytest;
 
 SemaphoreHandle_t test_semaphore;
 SemaphoreHandle_t task_semaphore_blink;
@@ -318,10 +320,13 @@ void setup() {
   //Wifi conn via bluetooth
   Task_init_bluetooth();
   TaskCreate_bluetooth();
+
+  // epd test
   epd_init();
 
+  // xTaskCreate(displaytest_loop, "displaytest_loop", 4096, NULL, 1, &xHandle_displaytest);
   xTaskCreate(UpdateStatus, "update_status", 1024, NULL, 1, &xHandle_status);
-  xTaskCreate(EPD_loop, "epd_loop", 4096, NULL, 2, &xHandle_epd);
+  xTaskCreate(EPD_loop, "epd_loop", 4096, NULL, 1, &xHandle_epd);
   // xTaskCreate(EPD_loop, "epd_loop", 4096, NULL, 1, &xHandle_epd);
   // Sustainable storage test
   // preferences.begin("credentials", false);
@@ -372,7 +377,7 @@ void setup() {
 
 void loop() {
   Serial.println("loop started...");
-  sleep(5);
+  sleep(2);
   wifi_connect();
 
   // display task test

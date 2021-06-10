@@ -53,25 +53,28 @@ void UpdateStatus(void *){
   while (running_flag)
   {
     pref.begin("status", true);
+    Serial.println("checking wifi");
     bool wifi_connection = pref.getBool("wifi_connected", false);
+    Serial.println("checking bluetooth");
+    bool bluetooth_connection = pref.getBool("bluetooth_connected", false);
+    pref.end();
+    Serial.println("here");
     // Serial.print("wifi_connection is ");
     // Serial.print(wifi_connection);
     // Serial.println("");
     // Serial.println("before wifi check");
     if (wifi_connection != WiFi.isConnected()){
       wifi_connection = WiFi.isConnected();
-      // Serial.println("here");
+      Serial.println("wifi is connected");
       xEventGroupSetBits(xEventGroup_display, event_wifi);
-      // Serial.println("here");
-
+      Serial.println("flag on");
+      sleep(15);
     }
-    // Serial.println("before bluetooth check");
-    bool bluetooth_connection = pref.getBool("bluetooth_connected", false);
+    Serial.println("before bluetooth check");
     if (bluetooth_connection != get_BluetoothStatus()){
       xEventGroupSetBits(xEventGroup_display, event_bluetooth);
       // Serial.println("bluetooth status changed");
     }
-    pref.end();
     Serial.println("status check running");
     sleep(2);
     
