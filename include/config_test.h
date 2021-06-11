@@ -13,8 +13,10 @@ const int sd_chipselect = 13;
 //event group sets
 #include "freertos/event_groups.h"
 extern EventGroupHandle_t xEventGroup_display;
-#define event_wifi (1<<0)
-#define event_bluetooth (1<<1)
-#define event_test (1<<2)
+#define event_wifi (1<<1)
+#define event_bluetooth (1<<2)
+#define event_test (1<<3)
+
+extern SemaphoreHandle_t display_semaphore_epd;
 
 #endif

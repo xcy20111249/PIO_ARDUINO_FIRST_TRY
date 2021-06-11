@@ -47,6 +47,7 @@ TaskHandle_t xHandle_displaytest;
 
 SemaphoreHandle_t test_semaphore;
 SemaphoreHandle_t task_semaphore_blink;
+SemaphoreHandle_t display_semaphore_epd;
 
 EventGroupHandle_t xEventGroup_display;
 
@@ -275,6 +276,8 @@ void setup() {
   pref.end();
 
   xEventGroup_display = xEventGroupCreate();
+  display_semaphore_epd = xSemaphoreCreateBinary();
+  xSemaphoreGive(display_semaphore_epd);
 
   //BLE and WiFi test setup
   /*
@@ -325,7 +328,7 @@ void setup() {
   epd_init();
 
   // xTaskCreate(displaytest_loop, "displaytest_loop", 4096, NULL, 1, &xHandle_displaytest);
-  xTaskCreate(UpdateStatus, "update_status", 1024, NULL, 1, &xHandle_status);
+  xTaskCreate(UpdateStatus, "update_status", 4096, NULL, 1, &xHandle_status);
   xTaskCreate(EPD_loop, "epd_loop", 4096, NULL, 1, &xHandle_epd);
   // xTaskCreate(EPD_loop, "epd_loop", 4096, NULL, 1, &xHandle_epd);
   // Sustainable storage test

@@ -152,6 +152,8 @@ void EPD_loop (void *){
       Serial.println("here");
       refresh = false;
     }
+    int stack_left = uxTaskGetStackHighWaterMark(NULL);
+    Serial.printf("[EPD4in2Utils]stack left is %dB\n", stack_left);
     Serial.println("EPD running");
     sleep(2);
   }

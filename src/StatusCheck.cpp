@@ -52,13 +52,16 @@ void UpdateStatus(void *){
   running_flag = true;
   while (running_flag)
   {
+    xSemaphoreTake(display_semaphore_epd, portMAX_DELAY);
+    Serial.println("status check running");
     pref.begin("status", true);
     Serial.println("checking wifi");
     bool wifi_connection = pref.getBool("wifi_connected", false);
     Serial.println("checking bluetooth");
     bool bluetooth_connection = pref.getBool("bluetooth_connected", false);
     pref.end();
-    Serial.println("here");
+    xSemaphoreGive(display_semaphore_epd);
+    Serial.println("sending event");
     // Serial.print("wifi_connection is ");
     // Serial.print(wifi_connection);
     // Serial.println("");
@@ -75,9 +78,10 @@ void UpdateStatus(void *){
       xEventGroupSetBits(xEventGroup_display, event_bluetooth);
       // Serial.println("bluetooth status changed");
     }
-    Serial.println("status check running");
+    Serial.println("status check done");
+    int stack_left = uxTaskGetStackHighWaterMark(NULL);
+    Serial.printf("[StatusCheck]stack left is %dB\n", stack_left);
     sleep(2);
-    
   }
   vTaskDelete(NULL);
 }
