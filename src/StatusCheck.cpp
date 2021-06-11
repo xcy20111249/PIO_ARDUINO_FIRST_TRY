@@ -9,41 +9,6 @@ static Preferences pref;
 static bool running_flag;
 // extern EventGroupHandle_t xEventGroup_display;
 
-/*
-void UpdateStatus(void *){
-  running_flag = true;
-  while (running_flag)
-  {
-    pref.begin("status", false);
-    bool wifi_connection = pref.getBool("wifi_connected", false);
-    Serial.print("wifi_connection is ");
-    Serial.print(wifi_connection);
-    Serial.println("");
-    Serial.println("before wifi check");
-    if (wifi_connection != WiFi.isConnected()){
-      wifi_connection = WiFi.isConnected();
-      Serial.println("here");
-      pref.putBool("wifi_connected", !wifi_connection);
-      Serial.println("here");
-
-      pref.putBool("status_changed", true);
-      Serial.println("wifi status changed");
-    }
-    Serial.println("before bluetooth check");
-    bool bluetooth_connection = pref.getBool("bluetooth_connected", false);
-    if (bluetooth_connection != get_BluetoothStatus()){
-      pref.putBool("bluetooth_connected", get_BluetoothStatus());
-      pref.putBool("status_changed", true);
-      Serial.println("bluetooth status changed");
-    }
-    pref.end();
-    Serial.println("status check running");
-    sleep(2);
-  }
-  vTaskDelete(NULL);
-}
-*/
-
 void UpdateStatus_stop(){
   running_flag = false;
 }
@@ -53,34 +18,35 @@ void UpdateStatus(void *){
   while (running_flag)
   {
     xSemaphoreTake(display_semaphore_epd, portMAX_DELAY);
-    Serial.println("status check running");
+    Serial.println("[StatusCheck]status check running");
     pref.begin("status", true);
-    Serial.println("checking wifi");
+    // Serial.println("[StatusCheck]checking wifi");
     bool wifi_connection = pref.getBool("wifi_connected", false);
-    Serial.println("checking bluetooth");
-    bool bluetooth_connection = pref.getBool("bluetooth_connected", false);
+    // Serial.println("[StatusCheck]checking bluetooth");
+    bool bluetooth_connection = pref.getBool("BT_connected", false);
     pref.end();
     xSemaphoreGive(display_semaphore_epd);
-    Serial.println("sending event");
+    // Serial.println("[StatusCheck]sending event");
     // Serial.print("wifi_connection is ");
     // Serial.print(wifi_connection);
     // Serial.println("");
     // Serial.println("before wifi check");
     if (wifi_connection != WiFi.isConnected()){
       wifi_connection = WiFi.isConnected();
-      Serial.println("wifi is connected");
+      // Serial.println("wifi is connected");
       xEventGroupSetBits(xEventGroup_display, event_wifi);
-      Serial.println("flag on");
-      sleep(15);
+      // Serial.println("flag on");
+      // sleep(15);
     }
-    Serial.println("before bluetooth check");
+    Serial.printf("BT is %d\n", bluetooth_connection);
+    Serial.printf("get BT is %d\n", get_BluetoothStatus());
     if (bluetooth_connection != get_BluetoothStatus()){
       xEventGroupSetBits(xEventGroup_display, event_bluetooth);
-      // Serial.println("bluetooth status changed");
+      Serial.println("bluetooth status changed");
     }
-    Serial.println("status check done");
-    int stack_left = uxTaskGetStackHighWaterMark(NULL);
-    Serial.printf("[StatusCheck]stack left is %dB\n", stack_left);
+    // Serial.println("[StatusCheck]status check done");
+    // int stack_left = uxTaskGetStackHighWaterMark(NULL);
+    // Serial.printf("[StatusCheck]stack left is %dB\n", stack_left);
     sleep(2);
   }
   vTaskDelete(NULL);

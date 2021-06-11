@@ -330,7 +330,6 @@ void setup() {
   // xTaskCreate(displaytest_loop, "displaytest_loop", 4096, NULL, 1, &xHandle_displaytest);
   xTaskCreate(UpdateStatus, "update_status", 4096, NULL, 1, &xHandle_status);
   xTaskCreate(EPD_loop, "epd_loop", 4096, NULL, 1, &xHandle_epd);
-  // xTaskCreate(EPD_loop, "epd_loop", 4096, NULL, 1, &xHandle_epd);
   // Sustainable storage test
   // preferences.begin("credentials", false);
 

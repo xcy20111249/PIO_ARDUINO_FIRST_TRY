@@ -3,6 +3,8 @@
 #include "Preferences.h"
 #include "image_imeds.h"
 #include "imageR6.h"
+#include "image_wifi.h"
+#include "image_bluetooth.h"
 
 #define COLORED     0
 #define UNCOLORED   1
@@ -44,14 +46,25 @@ int EPD_set_header (Epd epd, std::string text, int pos, int bgc){
 
   paint.Clear(COLORED);
   paint.DrawStringAt(indent, 2, text.c_str(), &Font16, 1-bgc);
-
+  epd.SetPartialWindow(paint.GetImage(), 0, 0, paint.GetWidth(), paint.GetHeight());
+  xSemaphoreTake(display_semaphore_epd, portMAX_DELAY);
   pref.begin("status", true);
   if(pref.getBool("wifi_connected", false)){
-    paint.DrawStringAt(356, 2, "wifi", &Font16, 1-bgc);
+    if(bgc){
+      epd.SetPartialWindow(IMAGE_wifi, 384, 2, 16, 16);
+    }else{
+      epd.SetPartialWindow(IMAGE_wifi_r, 384, 2, 16, 16);
+    }
+  }
+  if(pref.getBool("BT_connected", false)){
+    if(bgc){
+      epd.SetPartialWindow(IMAGE_bluetooth, 368, 2, 16, 16);
+    }else{
+      epd.SetPartialWindow(IMAGE_bluetooth_r, 368, 2, 16, 16);
+    }
   }
   pref.end();
-
-  epd.SetPartialWindow(paint.GetImage(), 0, 0, paint.GetWidth(), paint.GetHeight());
+  xSemaphoreGive(display_semaphore_epd);
   return 0;
 }
 
@@ -120,13 +133,12 @@ void EPD_loop (void *){
     pref.begin("status", false);
     if(eventRet & event_wifi){
       temp = pref.getBool("wifi_connected", false);
-      int k = pref.putBool("wifi_connected", !temp);
-      Serial.printf("putbool return %d\n", k);
+      pref.putBool("wifi_connected", !temp);
       refresh = true;
     }
     if(eventRet & event_bluetooth){
-      temp = pref.getBool("bluetooth_connected", false);
-      pref.putBool("bluetooth_connected", !temp);
+      temp = pref.getBool("BT_connected", false);
+      pref.putBool("BT_connected", !temp);
       refresh = true;
     }
     pref.end();
@@ -141,20 +153,16 @@ void EPD_loop (void *){
       // epd.DisplayFrame(IMAGER6);
     }
     if (refresh){
-      Serial.println("here");
       epd.ClearFrame();
       EPD_set_header (epd, "test_header", milieu);
       EPD_set_footer (epd, "test_footer", milieu);
-      Serial.println("here");
       epd.DisplayFrame();
-      Serial.println("here");
       epd.Sleep();
-      Serial.println("here");
       refresh = false;
     }
-    int stack_left = uxTaskGetStackHighWaterMark(NULL);
-    Serial.printf("[EPD4in2Utils]stack left is %dB\n", stack_left);
-    Serial.println("EPD running");
+    // int stack_left = uxTaskGetStackHighWaterMark(NULL);
+    // Serial.printf("[EPD4in2Utils]stack left is %dB\n", stack_left);
+    Serial.println("[EPD4in2Utils]EPD running");
     sleep(2);
   }
   vTaskDelete(NULL);
