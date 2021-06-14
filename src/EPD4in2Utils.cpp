@@ -57,6 +57,7 @@ int EPD_set_header (Epd epd, std::string text, int pos, int bgc){
     }
   }
   if(pref.getBool("BT_connected", false)){
+    Serial.println("bluetooth connection");
     if(bgc){
       epd.SetPartialWindow(IMAGE_bluetooth, 368, 2, 16, 16);
     }else{
@@ -137,8 +138,11 @@ void EPD_loop (void *){
       refresh = true;
     }
     if(eventRet & event_bluetooth){
+      Serial.println("event_bluetooth");
       temp = pref.getBool("BT_connected", false);
+      Serial.printf("BT_connected is %d\n", temp);
       pref.putBool("BT_connected", !temp);
+      Serial.printf("BT_connected is now %d\n", pref.getBool("BT_connected", false));
       refresh = true;
     }
     pref.end();
@@ -153,11 +157,12 @@ void EPD_loop (void *){
       // epd.DisplayFrame(IMAGER6);
     }
     if (refresh){
+      Serial.println("here");
       epd.ClearFrame();
       EPD_set_header (epd, "test_header", milieu);
       EPD_set_footer (epd, "test_footer", milieu);
       epd.DisplayFrame();
-      epd.Sleep();
+      // epd.Sleep();
       refresh = false;
     }
     // int stack_left = uxTaskGetStackHighWaterMark(NULL);
