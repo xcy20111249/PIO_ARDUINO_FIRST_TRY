@@ -23,7 +23,6 @@ void epd_init(){
   epd.DisplayFrame(IMAGE_imeds);
   epd.ClearFrame();
   Serial.printf("length of image is %d\n", strlen((char*)IMAGE_imeds));
-  epd.Sleep();
 }
 
 int EPD_set_header (Epd epd, std::string text, int pos, int bgc){
