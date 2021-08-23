@@ -26,6 +26,8 @@ void setup()
   //开启串口
   SerialMon.begin(115200);
   SerialAT.begin(115200, SERIAL_8N1, MODEM_RX, MODEM_TX);
+
+
 }
  
 void loop()
